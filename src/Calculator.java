@@ -1,33 +1,70 @@
-import java.util.Scanner;
-
 import javax.swing.JOptionPane;
 
 public class Calculator {
 
 	public static void main(String args[]) {
-		System.out.println("===LOG TIME CALCULATOR===\nBy Vince Ou\n"
-				+ "Enter your previous log time...\nIn hours:minutes format:");
-		Scanner keyboard = new Scanner(System.in);
-		String prevTime = keyboard.nextLine();
-		int timeTotal = 0;
-		if (!(prevTime.equals("0") || prevTime.equals(""))) {
-			timeTotal += 60 * Integer.parseInt(prevTime.substring(0,
-					prevTime.indexOf(":")));
-			timeTotal += Integer.parseInt(prevTime.substring(
-					prevTime.indexOf(":") + 1, prevTime.length()));
+		String prevTime = JOptionPane
+				.showInputDialog(
+						null,
+						"Welcome to Log Time Calculator.\n\nEnter your previously accumulated time,\nin hours:minutes format",
+						"Welcome!", JOptionPane.QUESTION_MESSAGE).trim();
+		while (!prevTime.matches("[0-9]{1,}:[0-9]{2}")) {
+			prevTime = JOptionPane
+					.showInputDialog(
+							null,
+							"Please enter a valid time,\nenter \"0:00\" if you do not have any time currently",
+							"Input Error", JOptionPane.WARNING_MESSAGE);
 		}
-		System.out.println("Now enter your log times in minutes.\n"
-				+ "After the last entry, enter a space and press enter");
-		String input = keyboard.nextLine();
+
+		String[] hoursMins = prevTime.split(":");
+		int prevMins = 0;
+		prevMins += 60 * Integer.parseInt(hoursMins[0]);
+		prevMins += Integer.parseInt(hoursMins[1]);
+
+		int newMins = 0;
+		boolean moreInput;
 		do {
-			try {
-				timeTotal += Integer.parseInt(input);
-			} catch (Exception e) {
+			String input = JOptionPane
+					.showInputDialog(
+							null,
+							"Now enter your flight time entry ,\nin hours:mins or just minutes",
+							"Enter Times", JOptionPane.QUESTION_MESSAGE).trim();
+			while (!(input.matches("[0-9]{1,}:[0-9]{2}") || input
+					.matches("[0-9]{0,}"))) {
+				input = JOptionPane
+						.showInputDialog(
+								null,
+								"Try again, entering\nhours:mins or just minutes without punctuation",
+								"Entry Error", JOptionPane.WARNING_MESSAGE)
+						.trim();
 			}
-			input = keyboard.nextLine();
-		} while (!(input.equals(" ") || input.equals("")));
-		System.out.println("Your log time is: " + (int) (timeTotal / 60)
-				+ " hour(s) and " + timeTotal % 60 + " minute(s).");
-		keyboard.close();
+
+			if (input.matches("[0-9]{1,}:[0-9]{2}")) {
+				String[] newTime = input.split(":");
+				newMins += 60 * Integer.parseInt(newTime[0]);
+				newMins += Integer.parseInt(newTime[1]);
+			} else if (input.matches("[0-9]{0,}")) {
+				newMins += Integer.parseInt(input);
+			}
+
+			if (JOptionPane.showConfirmDialog(null,
+					"Do you have any more flights to enter?", "More Times?",
+					JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+				moreInput = true;
+			else
+				moreInput = false;
+		} while (moreInput);
+
+		String totalNewTime = toHoursMinutes(newMins);
+		String totalTime = toHoursMinutes(newMins + prevMins);
+
+		JOptionPane.showConfirmDialog(null, "Your total time is "
+				+ totalTime + "\n Your time increased by " + totalNewTime
+				+ " this session.", "Results", JOptionPane.DEFAULT_OPTION,
+				JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	private static String toHoursMinutes(int minutes) {
+		return String.format("%d:%02d", minutes / 60, minutes % 60);
 	}
 }
